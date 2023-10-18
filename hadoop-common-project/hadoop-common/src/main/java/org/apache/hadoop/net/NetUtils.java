@@ -190,7 +190,8 @@ public class NetUtils {
           helpText);
     }
     target = target.trim();
-    boolean hasScheme = target.contains("://");    
+    target = ipv6MiddleBracket(target);
+    boolean hasScheme = target.contains("://");
     URI uri = null;
     try {
       uri = hasScheme ? URI.create(target) : URI.create("dummyscheme://"+target);
@@ -199,14 +200,14 @@ public class NetUtils {
           "Does not contain a valid host:port authority: " + target + helpText
       );
     }
-
+    LOG.info("### uri " + uri + ", target " + target);
     String host = uri.getHost();
     int port = uri.getPort();
     if (port == -1) {
       port = defaultPort;
     }
     String path = uri.getPath();
-    
+    LOG.info("### " + host + "," + port + ",hasSchema" + hasScheme + ", path" + path);
     if ((host == null) || (port < 0) ||
         (!hasScheme && path != null && !path.isEmpty()))
     {
@@ -215,6 +216,16 @@ public class NetUtils {
       );
     }
     return createSocketAddrForHost(host, port);
+  }
+
+  private static String ipv6MiddleBracket(String target) {
+    String newTarget = target;
+    String[] ipPorts = target.split(":");
+    if(ipPorts.length > 2) {
+      newTarget = "[" + target.substring(0, target.lastIndexOf(":")) + "]:" + ipPorts[ipPorts.length-1];
+    }
+    LOG.info("### target = " + target + ", newTarget = " + newTarget);
+    return  newTarget;
   }
 
   /**

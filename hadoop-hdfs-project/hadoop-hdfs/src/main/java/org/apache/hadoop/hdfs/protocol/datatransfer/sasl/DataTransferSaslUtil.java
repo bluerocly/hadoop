@@ -156,14 +156,27 @@ public final class DataTransferSaslUtil {
    * @param peer
    * @return InetAddress from peer
    */
-  public static InetAddress getPeerAddress(Peer peer) {
-    String remoteAddr = peer.getRemoteAddressString().split(":")[0];
-    int slashIdx = remoteAddr.indexOf('/');
+  public static InetAddress getPeerAddressNew(Peer peer) {
+    int colonIdx = peer.getRemoteAddressString().lastIndexOf(':');
+    String ipAddress = peer.getRemoteAddressString().substring(0, colonIdx);
+
+    int slashIdx = ipAddress.indexOf('/');
     return InetAddresses.forString(slashIdx != -1 ?
-        remoteAddr.substring(slashIdx + 1, remoteAddr.length()) :
-        remoteAddr);
+            ipAddress.substring(slashIdx + 1, ipAddress.length()) :
+            ipAddress);
   }
 
+  public static InetAddress getPeerAddress(Peer peer) {
+    LOG.info("### peer.getRemoteAddressString() = " + peer.getRemoteAddressString());
+    String remoteAddr = peer.getRemoteAddressString().split(":")[0];
+    LOG.info("### remoteAddr = " + remoteAddr);
+    int slashIdx = remoteAddr.indexOf('/');
+    String tmpStr = slashIdx != -1 ?
+            remoteAddr.substring(slashIdx + 1, remoteAddr.length()) :
+            remoteAddr;
+    LOG.info("### inetStr = " + tmpStr);
+    return InetAddresses.forString(tmpStr);
+  }
   /**
    * Creates a SaslPropertiesResolver from the given configuration.  This method
    * works by cloning the configuration, translating configuration properties
